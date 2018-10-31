@@ -1,0 +1,175 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+string rtrim(const string &);
+vector<string> split(const string &);
+
+// Complete the solve function below.
+
+#define md 1000000007
+#define ll long long
+ll dp[200][200][200];
+ll dp1[200][200][200][2];
+
+int solve(string a, string b, string c) {
+
+    
+    memset(dp,0,sizeof(dp));
+    memset(dp1,0,sizeof(dp1));
+    
+    int n1=a.length();
+    int n2=b.length();
+    int n3=c.length();
+    
+    int i,j,k;
+    
+    for(i=0;i<=n1;i++){
+        for(j=0;j<=n2;j++)
+        {dp[0][i][j]=1;
+         //cout<<dp[0][i][j];
+        }
+        //cout<<endl;
+    }
+    
+    dp1[0][0][0][0]=1;
+    dp1[0][0][0][1]=1;
+    for(i=1;i<=n1;i++){
+        dp1[0][i][0][1]=1;
+    }
+    for(i=1;i<=n2;i++){
+        dp1[0][0][i][0]=1;
+    }
+    
+    for(i=1;i<=n3;i++){
+        ll t1,t2,t3;
+        for(j=0;j<=n1;j++){
+            for(k=0;k<=n2;k++){
+                 t1=0,t2=0,t3=0;
+                
+                if(j!=0 && k!=0)
+                t1=dp[i][j-1][k-1];
+                else if(j==0 && k){
+                    t2=dp[i][j][k-1];
+                    dp1[i][j][k][0]=t2;
+                }
+                else if(k==0 && j){
+                    t3=dp[i][j-1][k];
+                    dp1[i][j][k][1]=t3;
+                }
+                /*if(j!=0)
+                    t2=dp[i][j-1][k]-t1-dp1[i][j-1][k][1];
+                if(k!=0){
+                    t3=dp[i][j][k-1]-t1-dp1[i][j][k-1][0];
+                }*/
+                
+                if(j!=0 && k!=0 ){
+                    ll tm=dp1[i][j-1][k][1];
+                    dp1[i][j][k][1]+=tm;
+                    t2+=tm;
+                }
+                
+                if(k!=0 && j){
+                    ll tm=dp1[i][j][k-1][0];
+                    dp1[i][j][k][0]+=tm;
+                    t3+=tm;
+                }
+                
+                dp[i][j][k]=t1+t2+t3;
+                
+              if(j!=0 && c[i-1]==a[j-1] && (j+k)==i){
+                  dp[i][j][k]+=(dp1[i-1][j-1][k][0]);
+                  dp1[i][j][k][0]+=(dp1[i-1][j-1][k][0]);
+                  dp1[i][j][k][1]+=(dp1[i-1][j-1][k][0]);
+              }
+                
+                if(k!=0 && c[i-1]==b[k-1] && (j+k)==i){
+                  dp[i][j][k]+=(dp1[i-1][j][k-1][1]);
+                    dp1[i][j][k][1]+=(dp1[i-1][j][k-1][1]);
+                    dp1[i][j][k][0]+=(dp1[i-1][j][k-1][1]);
+              }
+                
+                dp[i][j][k]%=md;
+                dp1[i][j][k][0]%=md;
+                dp1[i][j][k][1]%=md;
+            }
+        }
+        if(i==n3){
+            cout<<t1<<" "<<t2<<" "<<t3<<" ";
+        }
+    }
+    
+    for(i=0;i<=n3;i++){
+        for(j=0;j<=n1;j++){
+            for(k=0;k<=n2;k++){
+                cout<<dp[i][j][k];
+            }
+            cout<<" ";
+            for(k=0;k<=n2;k++){
+                cout<<dp1[i][j][k][0];
+            }
+            cout<<" ";
+            for(k=0;k<=n2;k++){
+                cout<<dp1[i][j][k][1];
+            }
+            cout<<" ";
+            cout<<endl;
+        }
+        cout<<endl;
+    }
+    
+    return dp[n3][n1][n2];
+
+}
+
+int main()
+{
+    ofstream fout(getenv("OUTPUT_PATH"));
+
+    string abc_temp;
+    getline(cin, abc_temp);
+
+    vector<string> abc = split(rtrim(abc_temp));
+
+    string a = abc[0];
+
+    string b = abc[1];
+
+    string c = abc[2];
+
+    int result = solve(a, b, c);
+
+    fout << result << "\n";
+
+    fout.close();
+
+    return 0;
+}
+
+string rtrim(const string &str) {
+    string s(str);
+
+    s.erase(
+        find_if(s.rbegin(), s.rend(), not1(ptr_fun<int, int>(isspace))).base(),
+        s.end()
+    );
+
+    return s;
+}
+
+vector<string> split(const string &str) {
+    vector<string> tokens;
+
+    string::size_type start = 0;
+    string::size_type end = 0;
+
+    while ((end = str.find(" ", start)) != string::npos) {
+        tokens.push_back(str.substr(start, end - start));
+
+        start = end + 1;
+    }
+
+    tokens.push_back(str.substr(start));
+
+    return tokens;
+}
